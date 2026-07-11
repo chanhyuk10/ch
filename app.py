@@ -1,18 +1,51 @@
 import streamlit as st
 
-st.markdown("# 앱 UI 만들기")
+with st.sidebar:
+    st.header("프로필")
+    user_name = st.text_input("닉네임")
+    weather = st.selectbox("오늘 날씨", ["맑음", "흐림", "비/눈", "매우 추움"])
+    st.markdown("---")
+    st.info(f"반가워요, {user_name}님! 오늘 날씨는 '{weather}'이네요.")
+
+st.title("👗 AI 코디 메이커")
+st.write("사이드바에서 날씨를 먼저 선택하고 코디를 시작하세요!")
+
+st.header("👕 아이템 조합하기")
+col1, col2 = st.columns(2)
+with col1:
+    st.subheader("상의")
+    top_type = st.radio("종류", ["후드티", "셔츠", "맨투맨", "반팔 티셔츠"])
+    top_color = st.select_slider("색상 톤", options=["밝음", "무난함", "어두움"])
+with col2:
+    st.subheader("하의")
+    bottom_type = st.radio("종류", ["청바지", "슬랙스", "트레이닝 팬츠", "반바지"])
+    bottom_color = st.select_slider("핏(Fit)", options=["슬림", "레귤러", "오버핏"])
+
+st.header("디테일 추가")
+tab1, tab2 = st.tabs(["신발", "액세서리"])
+with tab1:
+    st.write("오늘의 발걸음을 책임질 신발:")
+    shoes = st.selectbox("신발 선택", ["스니커즈", "운동화", "구두", "슬리퍼"])
+    with st.expander("신발 선택 팁 보기"):
+        st.info("너무 튀는 신발은 지양하도록 해요!")
+with tab2:
+    st.write("포인트 아이템:")
+    acc = st.multiselect("액세서리 추가", ["모자", "안경", "목걸이", "가방"])
+    with st.expander("액세서리 스타일링 팁 보기"):
+        st.warning("너무 많은 액세서리는 투머치가 될 수 있어요.")
+
 st.markdown("---")
-
-user_id = st.text_input("이름을 입력 해주세요", placeholder="example_user")
-ai_model = st.radio("학년을 알려주세요", ["1학년", "2학년", "3학년"], horizontal=True)
-age = st.number_input("반을 입력 해주세요", min_value=1, max_value=100, value=1)
-ai_speed = st.select_slider("난이도", options=["매우 쉬움", "쉬움", "보통", "어려움", "매우 어려움"], value="보통")
-creativity = st.slider("점수", 0, 100, 50)
-
-question = st.text_area("소감", placeholder="여기에 소감을 작성해주세요.")
-
-if st.button("확인"):
-    st.success(f"이름: {user_id} | 학년: {ai_model} | 반: {age}반 | 난이도: {ai_speed}")
-    st.markdown(f"점수: **{creativity}**")
-    st.info(f"소감: {question}")
-
+if st.button("코디 완성하기"):
+    with st.container(border=True):
+        st.subheader(f"{user_name}님의 오늘의 룩북")
+        st.write(f"오늘 같은 **{weather}** 날씨에는 이렇게 입어보세요!")
+        st.markdown(f"""
+        * **상의:** {top_color} {top_type}
+        * **하의:** {bottom_color} {bottom_type}
+        * **매칭:** {shoes}와 {', '.join(acc) if acc else '악세서리 없이 깔끔하게!'}
+        """)
+        st.success("오늘의 스타일링이 완성되었습니다! 자신 있게 외출하세요!")
+        
+        with st.expander("코디 연출 팁 영상 보기"):
+            st.video("https://www.youtube.com/watch?v=lkMZ8ytly1k")
+            st.write("전문가가 제안하는 코디 연출법을 참고해 보세요.")
