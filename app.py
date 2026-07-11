@@ -1,8 +1,6 @@
 import streamlit as st
 
-st.markdown("# AI 챗봇 만들기")
-st.markdown("# 한나우 ❤️ 최윤채")
-st.markdown("### 한나우는 아직 최윤채를 못잊었다")
+st.markdown("# 앱 UI 만들기")
 st.markdown("---")
 st.markdown("## 질문을 하시면 AI 친구가 응답합니다.")
 st.header("1. 기본 정보 입력")
