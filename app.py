@@ -4,4 +4,4 @@ count = 0
 while True:
     if st.button("증가"):
         count = count+1
-    st.markdown(f"##현재 숫자: '{count}'")
+st.markdown(f"##현재 숫자: '{count}'")
