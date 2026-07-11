@@ -12,5 +12,5 @@ creativity = st.slider("점수", 0, 100, 50)
 question = st.text_area("소감", placeholder="여기에 소감을 작성해주세요.")
 
 if st.button("확인"):
-    if agree:
+    if true:
         st.success(f"이름 ({user_id}님)" , f"({ai_model}" , f"({age})" , f"({ai_speed})")
