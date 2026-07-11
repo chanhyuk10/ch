@@ -5,7 +5,6 @@ st.markdown("---")
 user_id = st.text_input("이름을 입력 해주세요", placeholder="example_user")
 ai_model = st.radio("학년을 알려주세요", ["1학년", "2학년", "3학년"], horizontal=True)
 age = st.number_input("반을 입력 해주세요", min_value=1, max_value=100, value=17)
-question = st.text_area("AI에게 보낼 질문을 입력하세요", placeholder="여기에 질문을 작성해 주세요.")
 ai_speed = st.select_slider("난이도",options=["매우 쉬움", "쉬움", "보통", "어려움", "매우 어려움"],value="보통")
 creativity = st.slider("점수", 0, 100, 50)
 
