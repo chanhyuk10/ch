@@ -170,6 +170,12 @@ with st.sidebar:
         mass_max = mass_min + 0.1
     steps = st.slider("계산 지점 수", min_value=5, max_value=100, value=29)
 
+    st.divider()
+    success_alt = st.number_input(
+        "미션 성공 기준 고도 (m)", min_value=1.0, value=50.0, step=5.0,
+        help="이 고도 이상 도달해야 성공으로 표시합니다.",
+    )
+
     with st.expander("고정 상수 조정 (항력계수 · 공기밀도 · 추진제 질량 · 중력)"):
         cd = st.number_input("항력계수 C_d", min_value=0.05, value=0.45, step=0.01)
         dia = st.number_input("로켓 직경 (m)", min_value=0.01, value=0.10, step=0.005, format="%.3f")
@@ -204,21 +210,33 @@ with st.spinner("중량 구간을 스캔하는 중..."):
     masses, altitudes = run_sweep(mass_min, mass_max, steps, cd, dia, rho, g, prop_mass)
 
 best_idx = int(np.argmax(altitudes))
+success_mask = altitudes >= success_alt
+
 fig_sweep = go.Figure()
-fig_sweep.add_trace(go.Scatter(x=masses, y=altitudes, mode="lines+markers",
-                                line=dict(color="#43b7c4", width=2), marker=dict(size=5), name="최고 고도"))
+fig_sweep.add_trace(go.Scatter(x=masses, y=altitudes, mode="lines", line=dict(color="#adb5bd", width=1.5),
+                                showlegend=False))
+fig_sweep.add_trace(go.Scatter(x=masses[success_mask], y=altitudes[success_mask], mode="markers",
+                                marker=dict(size=7, color="#2f9e44"), name=f"성공 (≥{success_alt:.0f}m)"))
+fig_sweep.add_trace(go.Scatter(x=masses[~success_mask], y=altitudes[~success_mask], mode="markers",
+                                marker=dict(size=7, color="#e03131"), name=f"실패 (<{success_alt:.0f}m)"))
 fig_sweep.add_trace(go.Scatter(x=[masses[best_idx]], y=[altitudes[best_idx]], mode="markers",
-                                marker=dict(size=12, color="#e8b34a"), name="최고 지점"))
+                                marker=dict(size=13, color="#e8b34a", symbol="star"), name="최고 지점"))
+fig_sweep.add_hline(y=success_alt, line_dash="dot", line_color="#868e96",
+                     annotation_text=f"성공 기준 {success_alt:.0f}m", annotation_position="top left")
 fig_sweep.update_layout(height=340, margin=dict(l=10, r=10, t=10, b=10),
                          xaxis_title="로켓 중량 (kg)", yaxis_title="최고 고도 (m)",
                          paper_bgcolor="rgba(0,0,0,0)", template="plotly_white")
 st.plotly_chart(fig_sweep, use_container_width=True)
 
-s1, s2, s3 = st.columns(3)
+s1, s2, s3, s4 = st.columns(4)
 s1.metric("최고 고도 지점 중량", f"{masses[best_idx]:.2f} kg")
 alt_disp = f"{altitudes[best_idx]:.1f} m" if altitudes[best_idx] < 1000 else f"{altitudes[best_idx] / 1000:.2f} km"
 s2.metric("해당 최고 고도", alt_disp)
-s3.metric("계산 지점 수", f"{len(masses)}")
+if success_mask.any():
+    s3.metric("성공 중량 범위", f"{masses[success_mask].min():.2f} ~ {masses[success_mask].max():.2f} kg")
+else:
+    s3.metric("성공 중량 범위", "없음")
+s4.metric("성공 / 전체 지점", f"{int(success_mask.sum())} / {len(masses)}")
 
 # ---------- 3. 개별 궤적 ----------
 st.subheader("개별 궤적 살펴보기")
@@ -234,6 +252,11 @@ pick_mass = st.slider(
 with st.spinner("궤적 계산 중..."):
     res = run_single(pick_mass, cd, dia, rho, g, prop_mass)
 traj = res["traj"]
+
+if res["apogee"] >= success_alt:
+    st.success(f"✅ 미션 성공 — 최고 고도 {res['apogee']:.1f} m (기준 {success_alt:.0f} m 이상)")
+else:
+    st.error(f"❌ 미션 실패 — 최고 고도 {res['apogee']:.1f} m (기준 {success_alt:.0f} m 미달)")
 
 colA, colB = st.columns(2)
 with colA:
